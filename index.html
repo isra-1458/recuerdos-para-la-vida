@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Una sorpresa para ti 🌼❤️</title>
+  <meta name="theme-color" content="#0d0d18">
+  <style>
+    :root{
+      --bg:#0b0a12;
+      --card:rgba(25, 23, 36, 0.85);
+      --text:#fffdfa;
+      --soft:#e3dedb;
+      --yellow:#ffda66;
+      --gold:#f5b041;
+      --pink:#ff6b8b;
+      --line:rgba(255, 218, 102, 0.18);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    body{overflow-x:hidden}
+    
+    /* Fondo de Estrellas */
+    .stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .stars i{position:absolute;width:3px;height:3px;background:#ffeaa7;border-radius:50%;opacity:.6;animation:twinkle 3s infinite ease-in-out}
+    @keyframes twinkle{50%{opacity:1;transform:scale(1.8)}}
+    
+    .wrap{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:24px}
+    .page{width:min(100%,760px);text-align:center}
+    .screen{display:none;animation:in .75s ease both}
+    .screen.active{display:block}
+    @keyframes in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+    
+    .bear-hint{font-size:60px;margin-bottom:12px;filter:drop-shadow(0 0 15px rgba(255, 218, 102, 0.3));}
+    h1{font-size:clamp(2.1rem,7vw,4.2rem);margin:.2em 0;line-height:1.05;color:var(--yellow)}
+    h2{font-size:clamp(1.5rem,5.5vw,2.5rem);margin:.3em 0 1rem;color:var(--yellow)}
+    p{font-size:clamp(1rem,3.8vw,1.25rem);line-height:1.75;color:var(--soft);max-width:640px;margin:0 auto 20px}
+    
+    .card{background:linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 218, 102, 0.02));border:1px solid var(--line);border-radius:28px;padding:32px 22px;box-shadow:0 20px 70px rgba(0,0,0,.5);backdrop-filter:blur(14px)}
+    input{width:min(100%,280px);padding:16px 18px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font-size:1.2rem;text-align:center;letter-spacing:4px;outline:none}
+    input::placeholder{letter-spacing:normal;font-size:1rem;opacity:0.5}
+    button,.btn{border:0;border-radius:999px;padding:15px 28px;margin-top:18px;background:linear-gradient(135deg,var(--gold),var(--yellow));color:#1a1500;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 10px 30px rgba(245,176,65,.3);transition:.2s}
+    button:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 35px rgba(245,176,65,.4)}
+    
+    .error{min-height:24px;color:#ff85a2;font-size:.95rem;margin-top:10px}
+    .photo{width:100%;max-height:65vh;object-fit:cover;border-radius:24px;display:block;box-shadow:0 18px 60px rgba(0,0,0,.5);border:1px solid var(--line)}
+    .caption{padding-top:22px}
+    .flower-icon{font-size:50px;margin:8px 0}
+    .small{font-size:.92rem;opacity:.8}
+    
+    .final h1{font-size:clamp(2.5rem,8vw,4.8rem);background:linear-gradient(90deg,#fff,#ffda66,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .key{display:inline-block;margin:18px 0;padding:13px 26px;border-radius:18px;border:1px solid var(--line);background:rgba(255,218,102,.1);font-size:2rem;letter-spacing:9px;color:var(--yellow)}
+    .heart{font-size:44px;animation:pulse 1.5s infinite}
+    @keyframes pulse{50%{transform:scale(1.18)}}
+    
+    .music-control{position:fixed;right:18px;bottom:18px;z-index:4;background:rgba(20,20,32,.9);border:1px solid var(--line);padding:10px 18px;border-radius:999px;color:#fff;font-size:.85rem;backdrop-filter:blur(10px);display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,.4)}
+    .music-control:hover{background:rgba(30,30,48,.95)}
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <!-- Audio de fondo -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="assets/cancion.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Botón de control de música (Aparece tras desbloquear) -->
+  <div class="music-control" id="music-btn" onclick="toggleMusic()" style="display:none;">
+    <span id="music-icon">🎵</span>
+    <span id="music-text">Sonando nuestra canción</span>
+  </div>
+
+  <main class="wrap">
+    <div class="page">
+
+      <!-- PANTALLA 1: PISTA Y ACCESO -->
+      <section class="screen active" id="s1">
+        <div class="card">
+          <div class="bear-hint">🧸💬</div>
+          <p class="small">UNA NOTA ESPECIAL DE ESPINITA</p>
+          <h1>Espinita tiene un mensaje</h1>
+          <p>Revisa la <strong>mano derecha de Espinita</strong>. Ahí encontrarás la pista para continuar...</p>
+          <input id="code" type="text" maxlength="10" placeholder="Escribe la clave aquí..." aria-label="Clave secreta">
+          <br>
+          <button onclick="unlock()">Abrir la sorpresa 🌼</button>
+          <div class="error" id="error"></div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 2: BIENVENIDA Y PRIMAVERA -->
+      <section class="screen" id="s2">
+        <div class="card">
+          <p class="small">BIENVENIDA, MI VIDA</p>
+          <h1>Lyz Mariela ❤️</h1>
+          <div class="flower-icon">🌻🌼✨</div>
+          <p>Llegó la primavera, y con ella estas flores amarillas para iluminar tu día.</p>
+          <p>Quería prepararte un detalle especial para recordarte lo mucho que significas para mí.</p>
+          <button onclick="next(2)">Ver nuestros recuerdos 💛</button>
+        </div>
+      </section>
+
+      <!-- PANTALLA 3: ATARDECER -->
+      <section class="screen" id="s3">
+        <div class="card">
+          <img class="photo" src="assets/atardecer.jpeg" alt="Un atardecer juntos">
+          <div class="caption">
+            <h2>Aquellas cosas que disfrutamos ver 🌅</h2>
+            <p>Entre tantos paisajes y momentos, ver el atardecer a tu lado siempre será de mis cosas favoritas.</p>
+            <p>Porque el panorama es hermoso, pero tenerte cerca lo hace perfecto.</p>
+            <button onclick="next(3)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 4: FOTO 1 -->
+      <section class="screen" id="s4">
+        <div class="card">
+          <img class="photo" src="assets/foto1.jpeg" alt="Ese día entendí que tienes garra">
+          <div class="caption">
+            <h2>Ese día entendí que tienes garra 💪❤️</h2>
+            <p>Admiro tu fuerza, tu determinación y la valentía con la que le haces frente a todo.</p>
+            <button onclick="next(4)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 5: FOTO 2 -->
+      <section class="screen" id="s5">
+        <div class="card">
+          <img class="photo" src="assets/foto2.jpeg" alt="Gracias por mostrarme tu mundo">
+          <div class="caption">
+            <h2>Gracias por mostrarme tu mundo 🕯️✨</h2>
+            <p>Cada espacio que compartes conmigo y cada rincón de tu vida me hace querer permanecer siempre aquí.</p>
+            <button onclick="next(5)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 6: FOTO 3 -->
+      <section class="screen" id="s6">
+        <div class="card">
+          <img class="photo" src="assets/foto3.jpeg" alt="La paz que encontramos en esos lugares">
+          <div class="caption">
+            <h2>La paz que encontramos en esos lugares 🌿✨</h2>
+            <p>Estar rodeados de naturaleza, echados juntos y en calma... no hay tranquilidad comparable a estar a tu lado.</p>
+            <button onclick="next(6)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 7: FOTO 4 -->
+      <section class="screen" id="s7">
+        <div class="card">
+          <img class="photo" src="assets/foto4.jpeg" alt="Mi nnita linda">
+          <div class="caption">
+            <h2>Mi nnita linda 🌸✨</h2>
+            <p>Ver tu sonrisa sencilla y sincera en cualquier día brillante siempre me llena el corazón.</p>
+            <button onclick="next(7)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 8: FOTO 5 -->
+      <section class="screen" id="s8">
+        <div class="card">
+          <img class="photo" src="assets/foto5.jpeg" alt="Momentos simples">
+          <div class="caption">
+            <h2>Momentos simples 📸💛</h2>
+            <p>No necesitamos grandes cosas; hasta la captura de una foto dentro de otra foto se vuelve un recuerdo único contigo.</p>
+            <button onclick="next(8)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 9: FOTO 6 -->
+      <section class="screen" id="s9">
+        <div class="card">
+          <img class="photo" src="assets/foto6.jpeg" alt="Por más momentos así">
+          <div class="caption">
+            <h2>Por más momentos así 🖤✨</h2>
+            <p>Incluso en nuestras locuras, mascarillas de carbón y risas compartidas, me doy cuenta de lo divertido que es la vida a tu lado.</p>
+            <button onclick="next(9)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 10: FOTO 7 -->
+      <section class="screen" id="s10">
+        <div class="card">
+          <img class="photo" src="assets/foto7.jpeg" alt="Por qué me encantas">
+          <div class="caption">
+            <h2>Por qué me encantas 🍷🍓</h2>
+            <p>Por tus detalles, por la complicidad al tomarnos la mano y por cada momento especial que preparamos juntos.</p>
+            <button onclick="next(10)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 11: FOTO 8 -->
+      <section class="screen" id="s11">
+        <div class="card">
+          <img class="photo" src="assets/foto8.jpeg" alt="Por qué no dudaste en dar el primer paso">
+          <div class="caption">
+            <h2>Por qué no dudaste en dar el primer paso 🌙❤️</h2>
+            <p>Agradezco enormemente esa valentía y ese abrazo que nos unió aún más en la noche.</p>
+            <button onclick="next(11)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 12: FOTO 9 -->
+      <section class="screen" id="s12">
+        <div class="card">
+          <img class="photo" src="assets/foto9.jpeg" alt="Quiero recorrer muchos lugares contigo">
+          <div class="caption">
+            <h2>Quiero recorrer muchos lugares contigo ⛰️🧢</h2>
+            <p>No importa la caminata, la altura ni la niebla; llegar arriba y tomar una foto graciosa contigo siempre vale la pena.</p>
+            <button onclick="next(12)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 13: FOTO 10 -->
+      <section class="screen" id="s13">
+        <div class="card">
+          <img class="photo" src="assets/foto10.jpeg" alt="Quiero una vida contigo">
+          <div class="caption">
+            <h2>Quiero una vida contigo 🌟❤️</h2>
+            <p>Por las risas, los juegos, la diversión y porque sostenerte en mis hombros representa lo mucho que quiero cuidar de ti siempre.</p>
+            <button onclick="next(13)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 14: FOTO 11 -->
+      <section class="screen" id="s14">
+        <div class="card">
+          <img class="photo" src="assets/foto11.jpeg" alt="Tmo!">
+          <div class="caption">
+            <h2>Tmo! 🎉💛</h2>
+            <p>Cargar con alegría tus locuras y celebrar la vida entre abrazos apretados es mi momento favorito.</p>
+            <button onclick="next(14)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 15: FOTO 12 -->
+      <section class="screen" id="s15">
+        <div class="card">
+          <img class="photo" src="assets/foto12.jpeg" alt="Tu primer paso">
+          <div class="caption">
+            <h2>Tu primer paso 🌙✨</h2>
+            <p>Aquel abrazo nocturno donde todo comenzó a cobrar sentido y donde supe que ahí quería quedarme.</p>
+            <button onclick="next(15)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 16: FOTO 13 -->
+      <section class="screen" id="s16">
+        <div class="card">
+          <img class="photo" src="assets/foto13.jpeg" alt="Una hermosa flor">
+          <div class="caption">
+            <h2>Una hermosa flor 🌸🍃</h2>
+            <p>Entre todo el jardín y la naturaleza, la flor más bella siempre serás tú.</p>
+            <button onclick="next(16)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 17: FOTO 14 -->
+      <section class="screen" id="s17">
+        <div class="card">
+          <img class="photo" src="assets/foto14.jpeg" alt="Y comer en lugares épicos">
+          <div class="caption">
+            <h2>Y comer en lugares épicos 🥔🥩☀️</h2>
+            <p>No importa el menú ni el lugar, cualquier picnic improvisado sabe increíble si es contigo bajo el sol.</p>
+            <button onclick="next(17)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 18: FOTO 15 -->
+      <section class="screen" id="s18">
+        <div class="card">
+          <img class="photo" src="assets/foto15.jpeg" alt="Y las cosas únicas que vivimos">
+          <div class="caption">
+            <h2>Y las cosas únicas que vivimos 🍃👑</h2>
+            <p>Nuestras ocurrencias más raras y espontáneas son las que hacen que cada día juntos sea inolvidable.</p>
+            <button onclick="next(18)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 19: FOTO 16 -->
+      <section class="screen" id="s19">
+        <div class="card">
+          <img class="photo" src="assets/foto16.jpeg" alt="Sublime">
+          <div class="caption">
+            <h2>Sublime 🎈❤️</h2>
+            <p>Compartir momentos sencillos, una buena conversación y detalles del corazón hace que todo sea simplemente perfecto.</p>
+            <button onclick="next(19)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 20: FOTO 17 -->
+      <section class="screen" id="s20">
+        <div class="card">
+          <img class="photo" src="assets/foto17.jpeg" alt="Te odio y no me caes">
+          <div class="caption">
+            <h2>Te odio y no me caes 😜💋</h2>
+            <p>Nuestra forma única y juguetona de decirnos cuánto nos queremos en medio del caos y la diversión.</p>
+            <button onclick="next(20)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 21: FOTO 18 -->
+      <section class="screen" id="s21">
+        <div class="card">
+          <img class="photo" src="assets/foto18.jpeg" alt="Te pasas">
+          <div class="caption">
+            <h2>Te pasas ⛰️💚</h2>
+            <p>Llegar juntos a la cima, dejar nuestra huella escrita y admirar el horizonte unidos.</p>
+            <button onclick="next(21)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 22: FOTO 19 -->
+      <section class="screen" id="s22">
+        <div class="card">
+          <img class="photo" src="assets/foto19.jpeg" alt="Tenemos una lista interminable de cosas por hacer">
+          <div class="caption">
+            <h2>Tenemos una lista interminable de cosas por hacer 🤝✨</h2>
+            <p>Apenas estamos comenzando: nos quedan mil aventuras, lugares por explorar y recuerdos por construir mano a mano.</p>
+            <button onclick="next(22)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 23: FOTO 20 -->
+      <section class="screen" id="s23">
+        <div class="card">
+          <img class="photo" src="assets/foto20.jpeg" alt="Tienes un hermoso color">
+          <div class="caption">
+            <h2>Tienes un hermoso color 🌅✨</h2>
+            <p>Contemplar el atardecer y ver cómo la luz del sol resalta tu belleza es algo de lo que jamás me cansaré.</p>
+            <button onclick="next(23)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 24: FOTO 21 -->
+      <section class="screen" id="s24">
+        <div class="card">
+          <img class="photo" src="assets/foto21.jpeg" alt="Descubrimos un mundo verde">
+          <div class="caption">
+            <h2>Descubrimos un mundo verde 🌿☀️</h2>
+            <p>Recostarnos juntos en el pasto, mirar hacia arriba y sentir la tranquilidad de tenerte a mi lado.</p>
+            <button onclick="next(24)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 25: FOTO 22 -->
+      <section class="screen" id="s25">
+        <div class="card">
+          <img class="photo" src="assets/foto22.jpeg" alt="Eres mi primera vez en muchas cosas">
+          <div class="caption">
+            <h2>Eres mi primera vez en muchas cosas 🕯️✨</h2>
+            <p>Por todas esas experiencias elegantes, mágicas y nuevas que he descubierto y vivido por primera vez a tu lado.</p>
+            <button onclick="next(25)">Siguiente 🌼</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 26: FOTO 23 -->
+      <section class="screen" id="s26">
+        <div class="card">
+          <img class="photo" src="assets/foto23.jpeg" alt="Aquellas cosas que disfrutamos ver">
+          <div class="caption">
+            <h2>Aquellas cosas que disfrutamos ver 🌅🌊</h2>
+            <p>Sentados frente al mar, viendo cómo el sol se oculta... no hay mejor compañía en el mundo que tú.</p>
+            <button onclick="next(26)">Final 💌</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA FINAL: CIERRE EMOCIONAL CON 0019 -->
+      <section class="screen final" id="s27">
+        <div class="card">
+          <div class="heart">💛</div>
+          <h1>Para ti, Lyz Mariela</h1>
+          <p>Gracias por cada sonrisa, por acompañarme y por hacer que cada día sea más brillante.</p>
+          <p>Y como siempre decimos antes de despedirnos...</p>
+          <div class="key">0019</div>
+          <p>Te amo, mi K'oli Pankarita. 🌼❤️</p>
+          <p class="small">Siempre nosotros. Siempre 0019.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Generación de estrellas
+    const stars = document.getElementById('stars');
+    for(let i=0; i<70; i++){
+      const s = document.createElement('i');
+      s.style.left = Math.random()*100 + '%';
+      s.style.top = Math.random()*100 + '%';
+      s.style.animationDelay = (Math.random()*3) + 's';
+      s.style.animationDuration = (2 + Math.random()*3) + 's';
+      stars.appendChild(s);
+    }
+
+    const music = document.getElementById('bg-music');
+    const musicBtn = document.getElementById('music-btn');
+
+    // Validación de contraseña e inicio de música
+    function unlock(){
+      const code = document.getElementById('code').value.trim();
+      const error = document.getElementById('error');
+      if(code === 'Tmo!'){
+        error.textContent = '';
+        document.getElementById('s1').classList.remove('active');
+        document.getElementById('s2').classList.add('active');
+        
+        // Iniciar música tras interacción
+        music.play().then(() => {
+          musicBtn.style.display = 'flex';
+        }).catch(err => console.log('Audio autoplay bloqueado:', err));
+      } else {
+        error.textContent = 'Esa no es la nota de Espinita... revisa su mano derecha 🧸❤️';
+        document.getElementById('code').value = '';
+      }
+    }
+
+    // Pausar o reproducir audio manualmente
+    function toggleMusic(){
+      if(music.paused){
+        music.play();
+        document.getElementById('music-icon').textContent = '🎵';
+        document.getElementById('music-text').textContent = 'Sonando nuestra canción';
+      } else {
+        music.pause();
+        document.getElementById('music-icon').textContent = '🔇';
+        document.getElementById('music-text').textContent = 'Música pausada';
+      }
+    }
+
+    document.getElementById('code').addEventListener('keydown', e => {
+      if(e.key === 'Enter') unlock();
+    });
+
+    // Navegación entre pantallas
+    function next(current){
+      document.getElementById('s'+current).classList.remove('active');
+      document.getElementById('s'+(current+1)).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>
