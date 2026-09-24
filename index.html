@@ -1,467 +1,375 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Una sorpresa para ti 🌼❤️</title>
-  <meta name="theme-color" content="#0d0d18">
-  <style>
-    :root{
-      --bg:#0b0a12;
-      --card:rgba(25, 23, 36, 0.85);
-      --text:#fffdfa;
-      --soft:#e3dedb;
-      --yellow:#ffda66;
-      --gold:#f5b041;
-      --pink:#ff6b8b;
-      --line:rgba(255, 218, 102, 0.18);
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-    body{overflow-x:hidden}
-    
-    /* Fondo de Estrellas */
-    .stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-    .stars i{position:absolute;width:3px;height:3px;background:#ffeaa7;border-radius:50%;opacity:.6;animation:twinkle 3s infinite ease-in-out}
-    @keyframes twinkle{50%{opacity:1;transform:scale(1.8)}}
-    
-    .wrap{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:24px}
-    .page{width:min(100%,760px);text-align:center}
-    .screen{display:none;animation:in .75s ease both}
-    .screen.active{display:block}
-    @keyframes in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-    
-    .bear-hint{font-size:60px;margin-bottom:12px;filter:drop-shadow(0 0 15px rgba(255, 218, 102, 0.3));}
-    h1{font-size:clamp(2.1rem,7vw,4.2rem);margin:.2em 0;line-height:1.05;color:var(--yellow)}
-    h2{font-size:clamp(1.5rem,5.5vw,2.5rem);margin:.3em 0 1rem;color:var(--yellow)}
-    p{font-size:clamp(1rem,3.8vw,1.25rem);line-height:1.75;color:var(--soft);max-width:640px;margin:0 auto 20px}
-    
-    .card{background:linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 218, 102, 0.02));border:1px solid var(--line);border-radius:28px;padding:32px 22px;box-shadow:0 20px 70px rgba(0,0,0,.5);backdrop-filter:blur(14px)}
-    input{width:min(100%,280px);padding:16px 18px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font-size:1.2rem;text-align:center;letter-spacing:4px;outline:none}
-    input::placeholder{letter-spacing:normal;font-size:1rem;opacity:0.5}
-    button,.btn{border:0;border-radius:999px;padding:15px 28px;margin-top:18px;background:linear-gradient(135deg,var(--gold),var(--yellow));color:#1a1500;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 10px 30px rgba(245,176,65,.3);transition:.2s}
-    button:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 35px rgba(245,176,65,.4)}
-    
-    .error{min-height:24px;color:#ff85a2;font-size:.95rem;margin-top:10px}
-    .photo{width:100%;max-height:65vh;object-fit:cover;border-radius:24px;display:block;box-shadow:0 18px 60px rgba(0,0,0,.5);border:1px solid var(--line)}
-    .caption{padding-top:22px}
-    .flower-icon{font-size:50px;margin:8px 0}
-    .small{font-size:.92rem;opacity:.8}
-    
-    .final h1{font-size:clamp(2.5rem,8vw,4.8rem);background:linear-gradient(90deg,#fff,#ffda66,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
-    .key{display:inline-block;margin:18px 0;padding:13px 26px;border-radius:18px;border:1px solid var(--line);background:rgba(255,218,102,.1);font-size:2rem;letter-spacing:9px;color:var(--yellow)}
-    .heart{font-size:44px;animation:pulse 1.5s infinite}
-    @keyframes pulse{50%{transform:scale(1.18)}}
-    
-    .music-control{position:fixed;right:18px;bottom:18px;z-index:4;background:rgba(20,20,32,.9);border:1px solid var(--line);padding:10px 18px;border-radius:999px;color:#fff;font-size:.85rem;backdrop-filter:blur(10px);display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,.4)}
-    .music-control:hover{background:rgba(30,30,48,.95)}
-  </style>
-</head>
-<body>
-  <div class="stars" id="stars"></div>
-
-  <!-- Audio de fondo -->
-  <audio id="bg-music" loop preload="auto">
-    <source src="assets/cancion.mp3" type="audio/mpeg">
-  </audio>
-
-  <!-- Botón de control de música (Aparece tras desbloquear) -->
-  <div class="music-control" id="music-btn" onclick="toggleMusic()" style="display:none;">
-    <span id="music-icon">🎵</span>
-    <span id="music-text">Sonando nuestra canción</span>
-  </div>
-
-  <main class="wrap">
-    <div class="page">
-
-      <!-- PANTALLA 1: PISTA Y ACCESO -->
-      <section class="screen active" id="s1">
-        <div class="card">
-          <div class="bear-hint">🧸💬</div>
-          <p class="small">UNA NOTA ESPECIAL DE ESPINITA</p>
-          <h1>Espinita tiene un mensaje</h1>
-          <p>Revisa la <strong>mano derecha de Espinita</strong>. Ahí encontrarás la pista para continuar...</p>
-          <input id="code" type="text" maxlength="10" placeholder="Escribe la clave aquí..." aria-label="Clave secreta">
-          <br>
-          <button onclick="unlock()">Abrir la sorpresa 🌼</button>
-          <div class="error" id="error"></div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 2: BIENVENIDA Y PRIMAVERA -->
-      <section class="screen" id="s2">
-        <div class="card">
-          <p class="small">BIENVENIDA, MI VIDA</p>
-          <h1>Lyz Mariela ❤️</h1>
-          <div class="flower-icon">🌻🌼✨</div>
-          <p>Llegó la primavera, y con ella estas flores amarillas para iluminar tu día.</p>
-          <p>Quería prepararte un detalle especial para recordarte lo mucho que significas para mí.</p>
-          <button onclick="next(2)">Ver nuestros recuerdos 💛</button>
-        </div>
-      </section>
-
-      <!-- PANTALLA 3: ATARDECER -->
-      <section class="screen" id="s3">
-        <div class="card">
-          <img class="photo" src="assets/atardecer.jpeg" alt="Un atardecer juntos">
-          <div class="caption">
-            <h2>Aquellas cosas que disfrutamos ver 🌅</h2>
-            <p>Entre tantos paisajes y momentos, ver el atardecer a tu lado siempre será de mis cosas favoritas.</p>
-            <p>Porque el panorama es hermoso, pero tenerte cerca lo hace perfecto.</p>
-            <button onclick="next(3)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 4: FOTO 1 -->
-      <section class="screen" id="s4">
-        <div class="card">
-          <img class="photo" src="assets/foto1.jpeg" alt="Ese día entendí que tienes garra">
-          <div class="caption">
-            <h2>Ese día entendí que tienes garra 💪❤️</h2>
-            <p>Admiro tu fuerza, tu determinación y la valentía con la que le haces frente a todo.</p>
-            <button onclick="next(4)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 5: FOTO 2 -->
-      <section class="screen" id="s5">
-        <div class="card">
-          <img class="photo" src="assets/foto2.jpeg" alt="Gracias por mostrarme tu mundo">
-          <div class="caption">
-            <h2>Gracias por mostrarme tu mundo 🕯️✨</h2>
-            <p>Cada espacio que compartes conmigo y cada rincón de tu vida me hace querer permanecer siempre aquí.</p>
-            <button onclick="next(5)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 6: FOTO 3 -->
-      <section class="screen" id="s6">
-        <div class="card">
-          <img class="photo" src="assets/foto3.jpeg" alt="La paz que encontramos en esos lugares">
-          <div class="caption">
-            <h2>La paz que encontramos en esos lugares 🌿✨</h2>
-            <p>Estar rodeados de naturaleza, echados juntos y en calma... no hay tranquilidad comparable a estar a tu lado.</p>
-            <button onclick="next(6)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 7: FOTO 4 -->
-      <section class="screen" id="s7">
-        <div class="card">
-          <img class="photo" src="assets/foto4.jpeg" alt="Mi nnita linda">
-          <div class="caption">
-            <h2>Mi nnita linda 🌸✨</h2>
-            <p>Ver tu sonrisa sencilla y sincera en cualquier día brillante siempre me llena el corazón.</p>
-            <button onclick="next(7)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 8: FOTO 5 -->
-      <section class="screen" id="s8">
-        <div class="card">
-          <img class="photo" src="assets/foto5.jpeg" alt="Momentos simples">
-          <div class="caption">
-            <h2>Momentos simples 📸💛</h2>
-            <p>No necesitamos grandes cosas; hasta la captura de una foto dentro de otra foto se vuelve un recuerdo único contigo.</p>
-            <button onclick="next(8)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 9: FOTO 6 -->
-      <section class="screen" id="s9">
-        <div class="card">
-          <img class="photo" src="assets/foto6.jpeg" alt="Por más momentos así">
-          <div class="caption">
-            <h2>Por más momentos así 🖤✨</h2>
-            <p>Incluso en nuestras locuras, mascarillas de carbón y risas compartidas, me doy cuenta de lo divertido que es la vida a tu lado.</p>
-            <button onclick="next(9)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 10: FOTO 7 -->
-      <section class="screen" id="s10">
-        <div class="card">
-          <img class="photo" src="assets/foto7.jpeg" alt="Por qué me encantas">
-          <div class="caption">
-            <h2>Por qué me encantas 🍷🍓</h2>
-            <p>Por tus detalles, por la complicidad al tomarnos la mano y por cada momento especial que preparamos juntos.</p>
-            <button onclick="next(10)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 11: FOTO 8 -->
-      <section class="screen" id="s11">
-        <div class="card">
-          <img class="photo" src="assets/foto8.jpeg" alt="Por qué no dudaste en dar el primer paso">
-          <div class="caption">
-            <h2>Por qué no dudaste en dar el primer paso 🌙❤️</h2>
-            <p>Agradezco enormemente esa valentía y ese abrazo que nos unió aún más en la noche.</p>
-            <button onclick="next(11)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 12: FOTO 9 -->
-      <section class="screen" id="s12">
-        <div class="card">
-          <img class="photo" src="assets/foto9.jpeg" alt="Quiero recorrer muchos lugares contigo">
-          <div class="caption">
-            <h2>Quiero recorrer muchos lugares contigo ⛰️🧢</h2>
-            <p>No importa la caminata, la altura ni la niebla; llegar arriba y tomar una foto graciosa contigo siempre vale la pena.</p>
-            <button onclick="next(12)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 13: FOTO 10 -->
-      <section class="screen" id="s13">
-        <div class="card">
-          <img class="photo" src="assets/foto10.jpeg" alt="Quiero una vida contigo">
-          <div class="caption">
-            <h2>Quiero una vida contigo 🌟❤️</h2>
-            <p>Por las risas, los juegos, la diversión y porque sostenerte en mis hombros representa lo mucho que quiero cuidar de ti siempre.</p>
-            <button onclick="next(13)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 14: FOTO 11 -->
-      <section class="screen" id="s14">
-        <div class="card">
-          <img class="photo" src="assets/foto11.jpeg" alt="Tmo!">
-          <div class="caption">
-            <h2>Tmo! 🎉💛</h2>
-            <p>Cargar con alegría tus locuras y celebrar la vida entre abrazos apretados es mi momento favorito.</p>
-            <button onclick="next(14)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 15: FOTO 12 -->
-      <section class="screen" id="s15">
-        <div class="card">
-          <img class="photo" src="assets/foto12.jpeg" alt="Tu primer paso">
-          <div class="caption">
-            <h2>Tu primer paso 🌙✨</h2>
-            <p>Aquel abrazo nocturno donde todo comenzó a cobrar sentido y donde supe que ahí quería quedarme.</p>
-            <button onclick="next(15)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 16: FOTO 13 -->
-      <section class="screen" id="s16">
-        <div class="card">
-          <img class="photo" src="assets/foto13.jpeg" alt="Una hermosa flor">
-          <div class="caption">
-            <h2>Una hermosa flor 🌸🍃</h2>
-            <p>Entre todo el jardín y la naturaleza, la flor más bella siempre serás tú.</p>
-            <button onclick="next(16)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 17: FOTO 14 -->
-      <section class="screen" id="s17">
-        <div class="card">
-          <img class="photo" src="assets/foto14.jpeg" alt="Y comer en lugares épicos">
-          <div class="caption">
-            <h2>Y comer en lugares épicos 🥔🥩☀️</h2>
-            <p>No importa el menú ni el lugar, cualquier picnic improvisado sabe increíble si es contigo bajo el sol.</p>
-            <button onclick="next(17)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 18: FOTO 15 -->
-      <section class="screen" id="s18">
-        <div class="card">
-          <img class="photo" src="assets/foto15.jpeg" alt="Y las cosas únicas que vivimos">
-          <div class="caption">
-            <h2>Y las cosas únicas que vivimos 🍃👑</h2>
-            <p>Nuestras ocurrencias más raras y espontáneas son las que hacen que cada día juntos sea inolvidable.</p>
-            <button onclick="next(18)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 19: FOTO 16 -->
-      <section class="screen" id="s19">
-        <div class="card">
-          <img class="photo" src="assets/foto16.jpeg" alt="Sublime">
-          <div class="caption">
-            <h2>Sublime 🎈❤️</h2>
-            <p>Compartir momentos sencillos, una buena conversación y detalles del corazón hace que todo sea simplemente perfecto.</p>
-            <button onclick="next(19)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 20: FOTO 17 -->
-      <section class="screen" id="s20">
-        <div class="card">
-          <img class="photo" src="assets/foto17.jpeg" alt="Te odio y no me caes">
-          <div class="caption">
-            <h2>Te odio y no me caes 😜💋</h2>
-            <p>Nuestra forma única y juguetona de decirnos cuánto nos queremos en medio del caos y la diversión.</p>
-            <button onclick="next(20)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 21: FOTO 18 -->
-      <section class="screen" id="s21">
-        <div class="card">
-          <img class="photo" src="assets/foto18.jpeg" alt="Te pasas">
-          <div class="caption">
-            <h2>Te pasas ⛰️💚</h2>
-            <p>Llegar juntos a la cima, dejar nuestra huella escrita y admirar el horizonte unidos.</p>
-            <button onclick="next(21)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 22: FOTO 19 -->
-      <section class="screen" id="s22">
-        <div class="card">
-          <img class="photo" src="assets/foto19.jpeg" alt="Tenemos una lista interminable de cosas por hacer">
-          <div class="caption">
-            <h2>Tenemos una lista interminable de cosas por hacer 🤝✨</h2>
-            <p>Apenas estamos comenzando: nos quedan mil aventuras, lugares por explorar y recuerdos por construir mano a mano.</p>
-            <button onclick="next(22)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 23: FOTO 20 -->
-      <section class="screen" id="s23">
-        <div class="card">
-          <img class="photo" src="assets/foto20.jpeg" alt="Tienes un hermoso color">
-          <div class="caption">
-            <h2>Tienes un hermoso color 🌅✨</h2>
-            <p>Contemplar el atardecer y ver cómo la luz del sol resalta tu belleza es algo de lo que jamás me cansaré.</p>
-            <button onclick="next(23)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 24: FOTO 21 -->
-      <section class="screen" id="s24">
-        <div class="card">
-          <img class="photo" src="assets/foto21.jpeg" alt="Descubrimos un mundo verde">
-          <div class="caption">
-            <h2>Descubrimos un mundo verde 🌿☀️</h2>
-            <p>Recostarnos juntos en el pasto, mirar hacia arriba y sentir la tranquilidad de tenerte a mi lado.</p>
-            <button onclick="next(24)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 25: FOTO 22 -->
-      <section class="screen" id="s25">
-        <div class="card">
-          <img class="photo" src="assets/foto22.jpeg" alt="Eres mi primera vez en muchas cosas">
-          <div class="caption">
-            <h2>Eres mi primera vez en muchas cosas 🕯️✨</h2>
-            <p>Por todas esas experiencias elegantes, mágicas y nuevas que he descubierto y vivido por primera vez a tu lado.</p>
-            <button onclick="next(25)">Siguiente 🌼</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA 26: FOTO 23 -->
-      <section class="screen" id="s26">
-        <div class="card">
-          <img class="photo" src="assets/foto23.jpeg" alt="Aquellas cosas que disfrutamos ver">
-          <div class="caption">
-            <h2>Aquellas cosas que disfrutamos ver 🌅🌊</h2>
-            <p>Sentados frente al mar, viendo cómo el sol se oculta... no hay mejor compañía en el mundo que tú.</p>
-            <button onclick="next(26)">Final 💌</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PANTALLA FINAL: CIERRE EMOCIONAL CON 0019 -->
-      <section class="screen final" id="s27">
-        <div class="card">
-          <div class="heart">💛</div>
-          <h1>Para ti, Lyz Mariela</h1>
-          <p>Gracias por cada sonrisa, por acompañarme y por hacer que cada día sea más brillante.</p>
-          <p>Y como siempre decimos antes de despedirnos...</p>
-          <div class="key">0019</div>
-          <p>Te amo, mi K'oli Pankarita. 🌼❤️</p>
-          <p class="small">Siempre nosotros. Siempre 0019.</p>
-        </div>
-      </section>
-
-    </div>
-  </main>
-
-  <script>
-    // Generación de estrellas
-    const stars = document.getElementById('stars');
-    for(let i=0; i<70; i++){
-      const s = document.createElement('i');
-      s.style.left = Math.random()*100 + '%';
-      s.style.top = Math.random()*100 + '%';
-      s.style.animationDelay = (Math.random()*3) + 's';
-      s.style.animationDuration = (2 + Math.random()*3) + 's';
-      stars.appendChild(s);
-    }
-
-    const music = document.getElementById('bg-music');
-    const musicBtn = document.getElementById('music-btn');
-
-    // Validación de contraseña e inicio de música
-    function unlock(){
-      const code = document.getElementById('code').value.trim();
-      const error = document.getElementById('error');
-      if(code === 'Tmo!'){
-        error.textContent = '';
-        document.getElementById('s1').classList.remove('active');
-        document.getElementById('s2').classList.add('active');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuerdos para la Vida | Lyz Mariela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600;700&display=swap');
         
-        // Iniciar música tras interacción
-        music.play().then(() => {
-          musicBtn.style.display = 'flex';
-        }).catch(err => console.log('Audio autoplay bloqueado:', err));
-      } else {
-        error.textContent = 'Esa no es la nota de Espinita... revisa su mano derecha 🧸❤️';
-        document.getElementById('code').value = '';
-      }
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
 
-    // Pausar o reproducir audio manualmente
-    function toggleMusic(){
-      if(music.paused){
-        music.play();
-        document.getElementById('music-icon').textContent = '🎵';
-        document.getElementById('music-text').textContent = 'Sonando nuestra canción';
-      } else {
-        music.pause();
-        document.getElementById('music-icon').textContent = '🔇';
-        document.getElementById('music-text').textContent = 'Música pausada';
-      }
-    }
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
 
-    document.getElementById('code').addEventListener('keydown', e => {
-      if(e.key === 'Enter') unlock();
-    });
+        /* Fondo animado de estrellas/luces */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    // Navegación entre pantallas
-    function next(current){
-      document.getElementById('s'+current).classList.remove('active');
-      document.getElementById('s'+(current+1)).classList.add('active');
-      window.scrollTo({top:0, behavior:'smooth'});
-    }
-  </script>
+        .star {
+            position: absolute;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .card-glass {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 15px rgba(251, 191, 36, 0.1);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #111827;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+
+        /* Animación suave entre pantallas */
+        .screen-fade {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+        
+        .hidden-screen {
+            display: none !important;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+    <!-- Fondo Estrellado -->
+    <div class="stars-container" id="stars"></div>
+
+    <!-- Reproductor Audio Oculto -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="assets/cancion.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <!-- PANTALLA 1: INGRESO CON CLAVE -->
+    <div id="screen-login" class="screen-fade w-full max-w-md card-glass rounded-2xl p-6 md:p-8 text-center relative z-10">
+        <div class="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
+            <i class="fas fa-lock text-3xl text-amber-400"></i>
+        </div>
+        <h1 class="text-3xl font-bold font-cursive text-amber-400 mb-2">Página Privada</h1>
+        <p class="text-gray-300 text-sm mb-6">Ingresa la fecha especial para acceder a tus recuerdos (DD/MM/AAAA)</p>
+        
+        <form id="login-form" onsubmit="checkPassword(event)" class="space-y-4">
+            <div>
+                <input type="password" id="password-input" placeholder="Ej: 21/09/2026" 
+                       class="w-full px-4 py-3 rounded-xl bg-gray-900/80 border border-amber-500/30 text-center text-amber-300 font-semibold focus:outline-none focus:border-amber-400 transition">
+            </div>
+            <p id="error-msg" class="text-red-400 text-xs hidden">Clave incorrecta. Pista: Es la fecha de nuestro recuerdo especial.</p>
+            <button type="submit" class="w-full py-3 rounded-xl btn-gold flex items-center justify-center gap-2">
+                <span>Entrar</span>
+                <i class="fas fa-heart text-red-700"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- PANTALLA 2: VISOR DE RECUERDOS (CARRUSEL/TARJETAS) -->
+    <div id="screen-memories" class="screen-fade hidden-screen w-full max-w-lg card-glass rounded-2xl p-5 md:p-7 text-center relative z-10">
+        <!-- Control de Música flotante -->
+        <button onclick="toggleMusic()" id="music-btn" class="absolute top-4 right-4 text-amber-400 hover:text-amber-300 bg-gray-900/60 p-2.5 rounded-full border border-amber-500/30 transition">
+            <i class="fas fa-music text-sm" id="music-icon"></i>
+        </button>
+
+        <!-- Indicador de Progreso -->
+        <div class="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-1">
+            Recuerdo <span id="current-index">1</span> de <span id="total-index">1</span>
+        </div>
+
+        <!-- Título del Recuerdo -->
+        <h2 id="card-title" class="text-2xl md:text-3xl font-bold font-cursive text-amber-300 mb-3 min-h-[40px] flex items-center justify-center"></h2>
+
+        <!-- Contenedor de Imagen -->
+        <div class="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-4 border border-amber-500/20 bg-gray-900/50 flex items-center justify-center">
+            <img id="card-img" src="" alt="Recuerdo" class="w-full h-full object-cover transition-all duration-500">
+        </div>
+
+        <!-- Descripción del Recuerdo -->
+        <p id="card-desc" class="text-gray-200 text-sm md:text-base leading-relaxed mb-6 min-h-[60px] flex items-center justify-center px-2"></p>
+
+        <!-- Botones Navegación -->
+        <div class="flex items-center justify-between gap-3">
+            <button id="btn-prev" onclick="changeMemory(-1)" class="px-4 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-amber-500/20 text-amber-300 font-semibold text-sm transition flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Anterior
+            </button>
+            <button id="btn-next" onclick="changeMemory(1)" class="px-6 py-2.5 rounded-xl btn-gold text-sm flex items-center gap-2">
+                Siguiente <i class="fas fa-flower text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: MENSAJE FINAL -->
+    <div id="screen-final" class="screen-fade hidden-screen w-full max-w-md card-glass rounded-2xl p-6 md:p-8 text-center relative z-10">
+        <div class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
+            <i class="fas fa-heart text-4xl text-red-500 animate-pulse"></i>
+        </div>
+        <h2 class="text-3xl font-bold font-cursive text-amber-300 mb-4">Para ti hasta siempre...</h2>
+        <p class="text-gray-200 text-sm md:text-base leading-relaxed mb-6">
+            Para que en algún momento recuerdes todo lo vivido y lo mucho que ¡Te amo!
+        </p>
+        <button onclick="restartMemories()" class="px-6 py-3 rounded-xl btn-gold text-sm font-bold flex items-center justify-center gap-2 mx-auto">
+            <i class="fas fa-redo-alt"></i> Volver a ver los recuerdos
+        </button>
+    </div>
+
+    <script>
+        // Lista exacta de imágenes basada en tu carpeta 'assets'
+        const memories = [
+            {
+                title: "Aquellas cosas que disfrutamos ver 🌅",
+                img: "assets/aquellas cosas que disfrutamos ver.jpeg",
+                desc: "Entre tantos paisajes y momentos, ver el atardecer a tu lado siempre será de mis cosas favoritas."
+            },
+            {
+                title: "Descubrimos un mundo verde 🌿",
+                img: "assets/descubrimos un mundo verde.jpeg",
+                desc: "Cada rincón que exploramos se vuelve especial si es a tu lado."
+            },
+            {
+                title: "Eres mi primera vez en muchas cosas ✨",
+                img: "assets/eres mi primera vez en muchas cosas.jpeg",
+                desc: "Gracias por regalarme momentos únicos que jamás olvidaré."
+            },
+            {
+                title: "Ese día entendí que tienes garra 💪",
+                img: "assets/ese dia entendi que tienes garra.jpeg",
+                desc: "Tu fuerza y determinación son cosas que admiro profundamente de ti."
+            },
+            {
+                title: "Gracias por mostrarme tu mundo 🌎",
+                img: "assets/gracias por mostrarme tu mundo.jpeg",
+                desc: "Abrirme las puertas de lo que amas es uno de los mejores regalos."
+            },
+            {
+                title: "La paz que encontramos en esos lugares 🕊️",
+                img: "assets/la paz que encontramos en esos lugares.jpeg",
+                desc: "Donde sea que vayamos, tu compañía me transmite una tranquilidad única."
+            },
+            {
+                title: "Mi nnita linda 💖",
+                img: "assets/mi nnita linda.jpeg",
+                desc: "Siempre tan hermosa, única y especial para mí."
+            },
+            {
+                title: "Momentos simples ☕",
+                img: "assets/momentos simples.jpeg",
+                desc: "Las conversaciones sencillas y los detalles pequeños son los que más atesoro."
+            },
+            {
+                title: "Por más momentos así 🥂",
+                img: "assets/por mas momentos asi.jpeg",
+                desc: "Deseo seguir creando recuerdos hermosos año tras año a tu lado."
+            },
+            {
+                title: "Por qué me encantas 🥰",
+                img: "assets/por que me encantas.jpeg",
+                desc: "Por tu forma de ser, tu sonrisa y la luz que transmites a donde vas."
+            },
+            {
+                title: "Por qué no dudaste en dar el primer paso 👣",
+                img: "assets/por que no dudaste en dar el primer paso.jpeg",
+                desc: "Un momento valiente que cambió todo para bien."
+            },
+            {
+                title: "Quiero recorrer muchos lugares contigo 🗺️",
+                img: "assets/Quiero recorrer muchos lugares contigo.jpeg",
+                desc: "El mapa es enorme, pero quiero conocerlo completo junto a ti."
+            },
+            {
+                title: "Quiero una vida contigo 💍",
+                img: "assets/quiero una vida contigo.jpeg",
+                desc: "Soñar a futuro es hermoso, pero construirlo a tu lado lo es todo."
+            },
+            {
+                title: "Sublime 🌸",
+                img: "assets/sublime.jpeg",
+                desc: "Simplemente perfecto, un instante mágico guardado en el corazón."
+            },
+            {
+                title: "Te odio y no me caes 😜",
+                img: "assets/Te odio y no me caes.jpeg",
+                desc: "Nuestras bromas y complicidad que hacen que todo sea divertido."
+            },
+            {
+                title: "Te pasas 🤭",
+                img: "assets/te pasas.jpeg",
+                desc: "Siempre sacándome una sonrisa con tus ocurrencias."
+            },
+            {
+                title: "Lista de cosas por hacer 📝",
+                img: "assets/tenemos una lista interminable lista de cosas por hacer.jpeg",
+                desc: "Tenemos una lista interminable de cosas por hacer juntos aún."
+            },
+            {
+                title: "Tienes un hermoso color 🎨",
+                img: "assets/tienes un hermoso color.jpeg",
+                desc: "Llenas de brillo y alegría cada día ordinario."
+            },
+            {
+                title: "Tmo! ❤️",
+                img: "assets/Tmo!.jpeg",
+                desc: "Te amo con todo mi corazón."
+            },
+            {
+                title: "Tu primer paso 🐾",
+                img: "assets/tu primer paso.jpeg",
+                desc: "Recordando esos inicios llenos de ilusión."
+            },
+            {
+                title: "Una hermosa flor 🌼",
+                img: "assets/una hermosa flor.jpeg",
+                desc: "Tan delicada, radiante y hermosa como tú."
+            },
+            {
+                title: "Comer en lugares épicos 🍔",
+                img: "assets/y comer en lugar epicos.jpeg",
+                desc: "Disfrutar de la buena comida siempre sabe mejor si es contigo."
+            },
+            {
+                title: "Las cosas únicas que vivimos ✨",
+                img: "assets/y las cosas unicas que vivimos.jpeg",
+                desc: "Momentos irrepetibles que forman nuestra propia historia."
+            }
+        ];
+
+        let currentIndex = 0;
+        const validPasswords = ["21/09/2026", "21-09-2026", "21092026", "21/09/26", "lyz", "lyzmariela"];
+
+        // Generar partículas de luz
+        function createStars() {
+            const container = document.getElementById('stars');
+            for(let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                container.appendChild(star);
+            }
+        }
+
+        // Login check
+        function checkPassword(e) {
+            e.preventDefault();
+            const input = document.getElementById('password-input').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('error-msg');
+
+            if (validPasswords.includes(input) || input !== "") { // Permite ingresar con cualquier clave o las sugeridas
+                document.getElementById('screen-login').classList.add('hidden-screen');
+                document.getElementById('screen-memories').classList.remove('hidden-screen');
+                
+                // Intentar reproducir música
+                const music = document.getElementById('bg-music');
+                music.play().catch(err => console.log("Audio autoplay prevenido por el navegador"));
+                
+                initMemories();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function initMemories() {
+            document.getElementById('total-index').innerText = memories.length;
+            showMemory(0);
+        }
+
+        function showMemory(index) {
+            if (index < 0 || index >= memories.length) return;
+            
+            currentIndex = index;
+            const item = memories[currentIndex];
+
+            document.getElementById('current-index').innerText = currentIndex + 1;
+            document.getElementById('card-title').innerText = item.title;
+            document.getElementById('card-img').src = item.img;
+            document.getElementById('card-desc').innerText = item.desc;
+
+            // Ajuste de botones
+            document.getElementById('btn-prev').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+            
+            const nextBtn = document.getElementById('btn-next');
+            if (currentIndex === memories.length - 1) {
+                nextBtn.innerHTML = 'Ver mensaje final <i class="fas fa-heart text-xs"></i>';
+            } else {
+                nextBtn.innerHTML = 'Siguiente <i class="fas fa-flower text-xs"></i>';
+            }
+        }
+
+        function changeMemory(step) {
+            if (currentIndex + step >= memories.length) {
+                // Ir a la pantalla final
+                document.getElementById('screen-memories').classList.add('hidden-screen');
+                document.getElementById('screen-final').classList.remove('hidden-screen');
+            } else {
+                showMemory(currentIndex + step);
+            }
+        }
+
+        function restartMemories() {
+            document.getElementById('screen-final').classList.add('hidden-screen');
+            document.getElementById('screen-memories').classList.remove('hidden-screen');
+            showMemory(0);
+        }
+
+        function toggleMusic() {
+            const music = document.getElementById('bg-music');
+            const icon = document.getElementById('music-icon');
+            
+            if (music.paused) {
+                music.play();
+                icon.className = 'fas fa-music text-amber-400';
+            } else {
+                music.pause();
+                icon.className = 'fas fa-volume-mute text-gray-400';
+            }
+        }
+
+        createStars();
+    </script>
 </body>
 </html>
