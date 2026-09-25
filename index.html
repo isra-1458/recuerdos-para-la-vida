@@ -74,7 +74,7 @@
   <main class="wrap">
     <div class="page">
 
-      <!-- PANTALLA 1: PISTA Y ACCESO -->
+      <!-- PANTALLA 1: PISTA Y ACCESO INICIAL -->
       <section class="screen active" id="s1">
         <div class="card">
           <div class="bear-hint">🧸💬</div>
@@ -410,13 +410,13 @@
     const music = document.getElementById('bg-music');
     const musicBtn = document.getElementById('music-btn');
 
-    // Validación inicial
+    // Validación inicial: ÚNICAMENTE la nota de Espinita (tmo / tmo!)
     function unlock() {
       const codeInput = document.getElementById('code');
       const val = codeInput ? codeInput.value.trim().toLowerCase() : '';
       const error = document.getElementById('error');
 
-      if (val === 'tmo!' || val === 'tmo' || val === '0019') {
+      if (val === 'tmo!' || val === 'tmo') {
         if (error) error.textContent = '';
         document.getElementById('s1').classList.remove('active');
         document.getElementById('s2').classList.add('active');
